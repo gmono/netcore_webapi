@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-
+using LiteDB;
 namespace webapi.Controllers
 {
     [Route("api/[controller]")]
@@ -18,9 +18,27 @@ namespace webapi.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public TestModel Get(string id)
         {
-            return "value";
+            using(var db=new LiteDatabase(@"MyLite.db"))
+            {
+                var dataset=db.GetCollection<TestModel>("UserInfo");
+                var testdata=new TestModel()
+                {
+                    Name="高子健",
+                    Nicks=new string[]{"Gmono","上清","月落"},
+                    BirthDay=new DateTime(1997,4,11),
+                    UserId="gaozijian",
+                    PassWord="testpassword"
+                };
+                dataset.Insert(testdata);
+                testdata.PassWord="testpass";
+                dataset.Update(testdata);
+                dataset.EnsureIndex(x=>x.UserId);
+
+                var result=dataset.Find(x=>x.UserId==id.ToString());
+                return result.First();
+            }
         }
 
         // POST api/values

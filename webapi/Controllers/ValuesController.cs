@@ -17,8 +17,8 @@ namespace webapi.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
-        public TestModel Get(string id)
+        [HttpGet("{id}/{pws}")]
+        public object Get(string id,string pws)
         {
             using(var db=new LiteDatabase(@"MyLite.db"))
             {
@@ -35,9 +35,10 @@ namespace webapi.Controllers
                 testdata.PassWord="testpass";
                 dataset.Update(testdata);
                 dataset.EnsureIndex(x=>x.UserId);
-
-                var result=dataset.Find(x=>x.UserId==id.ToString());
-                return result.First();
+                var result=dataset.Find(x=>x.UserId==id&&x.PassWord==pws);
+                if(result.Count()>0)
+                    return result.First();
+                return "错误 用户名或密码错误！";
             }
         }
 
